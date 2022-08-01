@@ -23,6 +23,9 @@ Then, execute
 $ git clone git@github.com:christophfeinauer/ProteinMeanDimension.git && cd ProteinMeanDimension
 ```
 
+This downloads the code and the data for the analysis of the four mutational datasets. The MSAs contained here are a subset of the DeepSequence MSAs (see below) with some additional information about mutational effects.
+
+
 ### Create Julia Environment
 
 
@@ -38,7 +41,61 @@ Run
 bash get_data.sh
 ```
 
-to get the deepsequence alignments. These are used for the
+to get the Deepsequence alignments. These are used for the calculation of the mean dimension for all Deepsequence alignments.
+
+
+## Train ArDCA
+
+The instructions below are for running the `lambdaJ` sweep and also for calculating the mean dimension based on the DeepSequence alignments. If you need only one you can skip the parts you do not need.
+
+Enter the `ardca` folder and start Julia (replace `32` with the number of threads you want to use):
+
+```
+cd ardca && julia -t 32
+```
+
+In Julia, activate the environment and include the code:
+
+```
+julia> activate ..
+julia> include("ardca.jl")
+```
+
+Run logarithmic sweep over different values for `lambdaJ` (the default arguments direct the function to the correct folders):
+
+```
+julia> train_folder_loglambdaJsweep()
+```
+
+The models are placed in the `models` folder.
+
+***Attention***: This results in about 44 gigabytes of model files.
+
+Run on all DeeqpSequence alignments (the default arguments direct the function to the correct folders):
+
+```
+julia> train_folder()
+```
+
+The models are place in the `models` folder.
+
+
+Create samples:
+
+```
+julia> include("sample.jl")
+julia> create_samples_folder("./models")
+```
+
+If you also want the Spearman correlation for the DMS datasets, run
+
+```
+julia> calculate_sr()
+```
+
+
+## Train Variational Autoencoder
+
 
 ## Calculating the mean dimension on a new model
 

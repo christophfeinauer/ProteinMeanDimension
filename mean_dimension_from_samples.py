@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-def estimate_mean_dimension(logp, nsamples, q, N):
+def estimate_mean_dimension(logp, nsamples_per_N, q, N):
 
     contribs = []
 
@@ -17,7 +17,7 @@ def estimate_mean_dimension(logp, nsamples, q, N):
 
         contribs.append(np.var(logp_i_rand - logp_i_mean))
 
-    var_total = np.var(logp.reshape(nsamples, q)[range(nsamples), np.random.randint(low=0, high=q, size=nsamples)])
+    var_total = np.var(logp.reshape(nsamples_per_N*N, q)[range(nsamples_per_N*N), np.random.randint(low=0, high=q, size=nsamples_per_N*N)])
 
     md = sum(contribs) / var_total
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     logp = logp.reshape(nsamples_per_N, N, q)
     samples = samples.reshape(nsamples_per_N, N, q, N)
 
-    md, contribs, var_total = estimate_mean_dimension(logp, nsamples, q, N)
+    md, contribs, var_total = estimate_mean_dimension(logp, nsamples_per_N, q, N)
 
     if args.bootstrap > 0:
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         print("bootstrapping..")
         for k in tqdm(range(args.bootstrap)):
             logp_bootstrap = logp[np.random.randint(low=0, high=nsamples_per_N, size=nsamples_per_N), :, :]
-            md_bootstrap, contribs_bootstrap, var_total_bootstrap = estimate_mean_dimension(logp, nsamples, q, N)
+            md_bootstrap, contribs_bootstrap, var_total_bootstrap = estimate_mean_dimension(logp, nsamples_per_N, q, N)
             md_vec[k] = md_bootstrap
             contribs_mat[:, k] = contribs_bootstrap[:]
             var_total_vec[k] = var_total_bootstrap
